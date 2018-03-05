@@ -560,6 +560,40 @@ void *hwc_vsync_thread(void *data)
     return NULL;
 }
 
+#ifdef SUPPORTS_DOZE_POWER_MODES
+static int exynos5_setDozeMode(struct hwc_composer_device_1 *dev, int disp, int mode)
+{
+    struct exynos5_hwc_composer_device_1_t *pdev =
+            (struct exynos5_hwc_composer_device_1_t *)dev;
+    enum decon_doze_mode decon_mode;
+
+    if (mode == HWC_POWER_MODE_DOZE)
+        decon_mode = DECON_POWER_MODE_DOZE;
+    else if (mode == HWC_POWER_MODE_DOZE_SUSPEND)
+        decon_mode = DECON_POWER_MODE_DOZE_SUSPEND;
+    else
+        return -EINVAL; // WTF?
+
+    int err = ioctl(pdev->primaryDisplay->mDisplayFd, S3CFB_POWER_MODE, (__u32)decon_mode);
+    if (err < 0) {
+        if (decon_mode == DECON_POWER_MODE_DOZE_SUSPEND && errno == EEXIST) {
+            ALOGI("S3CFB_POWER_MODE ioctl failed for mode %d: display already dozing", mode);
+        }
+        else if (errno == ENOTTY) {
+            ALOGE("S3CFB_POWER_MODE ioctl failed for mode %d: decon doesn't support DOZE(_SUSPEND)", mode,
+                    strerror(errno), errno);
+        }
+        else {
+            ALOGE("S3CFB_POWER_MODE ioctl failed for mode %d: %s (%d)", mode,
+                    strerror(errno), errno);
+        }
+        return -errno;
+    }
+
+    return 0;
+}
+#endif
+
 int exynos5_setPowerMode(struct hwc_composer_device_1 *dev, int disp, int mode)
 {
     struct exynos5_hwc_composer_device_1_t *pdev =
@@ -577,9 +611,14 @@ int exynos5_setPowerMode(struct hwc_composer_device_1 *dev, int disp, int mode)
         break;
     case HWC_POWER_MODE_DOZE:
     case HWC_POWER_MODE_DOZE_SUSPEND:
+#ifdef SUPPORTS_DOZE_POWER_MODES
+        // give special treatment to doze-modes
+        return exynos5_setDozeMode(dev, disp, mode);
+#else
         // FIXME: As specified in Exynos framebuffer driver, this will return -EINVAL.
         fb_blank = FB_BLANK_VSYNC_SUSPEND;
         break;
+#endif
     case HWC_POWER_MODE_NORMAL:
         fb_blank = FB_BLANK_UNBLANK;
         break;
