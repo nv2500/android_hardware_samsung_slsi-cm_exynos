@@ -16,6 +16,12 @@
 
 #ifndef ANDROID_EXYNOS_HWC_H_
 #define ANDROID_EXYNOS_HWC_H_
+
+#define LOG_TAG  "hwcomposer"
+// #define LOG_NDEBUG  0
+
+#include <utils/Log.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>

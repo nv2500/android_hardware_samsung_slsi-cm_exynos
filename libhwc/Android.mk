@@ -98,8 +98,6 @@ ifneq ($(filter exynos7420 exynos7580 exynos7880 exynos8890, $(TARGET_SOC)),)
 	LOCAL_CFLAGS += -DDECON_FB
 endif
 
-LOCAL_CFLAGS += -DLOG_TAG=\"hwcomposer\"
-
 LOCAL_C_INCLUDES += \
 	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include \
 	$(LOCAL_PATH)/../include \
