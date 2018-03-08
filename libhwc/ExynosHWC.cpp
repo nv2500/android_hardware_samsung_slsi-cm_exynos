@@ -565,7 +565,7 @@ static int exynos5_setDozeMode(struct hwc_composer_device_1 *dev, int disp, int 
 {
     struct exynos5_hwc_composer_device_1_t *pdev =
             (struct exynos5_hwc_composer_device_1_t *)dev;
-    enum decon_doze_mode decon_mode;
+    int decon_mode; // clang doesn't allow using <enum decon_doze_mode>
 
     if (mode == HWC_POWER_MODE_DOZE)
         decon_mode = DECON_POWER_MODE_DOZE;
