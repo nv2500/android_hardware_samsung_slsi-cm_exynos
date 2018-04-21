@@ -29,8 +29,10 @@ common_exynos_dirs := \
 	libexynosdisplay
 
 ifneq ($(BOARD_TV_PRIMARY), true)
+ifneq ($(BOARD_USES_PREBUILT_HWCOMPOSER), true)
 common_exynos_dirs += \
 	libhwc
+endif
 endif
 
 ifeq ($(BOARD_USES_VIRTUAL_DISPLAY), true)
